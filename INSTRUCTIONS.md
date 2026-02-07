@@ -1,148 +1,113 @@
-# Claude Code Plugin — AI Build Instructions
+# How to Build a Plugin (Human Guide)
 
-You are scaffolding a new Claude Code plugin using a template. Follow these steps exactly.
+Step-by-step walkthrough. Takes ~10 minutes.
 
-## Step 1: Clone the Template
+---
+
+## 1. Clone the template
 
 ```bash
-git clone https://github.com/lvluu/claude-code-plugin-template.git <plugin-name>
-cd <plugin-name>
-rm -rf .git
-git init
+git clone https://github.com/lvluu/claude-code-plugin.git my-plugin
+cd my-plugin
+rm -rf .git && git init
 ```
 
-Ask the user for `<plugin-name>` if not already provided.
+## 2. Name your plugin
 
-## Step 2: Gather Requirements
-
-Ask the user (skip anything already answered):
-
-1. **Plugin name** — kebab-case identifier (e.g. `my-awesome-plugin`)
-2. **Description** — one sentence: what does this plugin do?
-3. **Author name**
-4. **Which MCP servers?** — show this catalog and let them pick:
-   | Server | What it does |
-   |--------|-------------|
-   | `serena` | Semantic code intelligence via LSP (30+ langs) |
-   | `chrome-devtools` | Chrome DevTools Protocol (inspect, debug, profile) |
-   | `context7` | Up-to-date library/framework documentation lookup |
-   | `shadcn` | Official shadcn CLI with MCP support |
-   | _(custom)_ | User can provide their own MCP server config |
-5. **Commands** — any slash commands? Ask for name + what it should do
-6. **Skills** — any auto-invoked skills? Ask for name + trigger conditions + instructions
-7. **Agents** — any subagents? Ask for name + role + system prompt summary
-8. **Hooks** — any event hooks? (most users won't need these initially)
-
-## Step 3: Fill in plugin.json
-
-Edit `.claude-plugin/plugin.json`:
+Open `.claude-plugin/plugin.json` and fill in:
 
 ```json
 {
-  "name": "<plugin-name>",
-  "version": "0.1.0",
-  "description": "<user's description>",
-  "author": {
-    "name": "<user's name>"
-  },
-  "license": "MIT",
-  "keywords": [<relevant keywords>],
-  "mcpServers": "./.mcp.json",
-  "agents": "./agents/",
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "name": "my-plugin",
+  "description": "What your plugin does in one sentence",
+  "author": { "name": "Your Name" }
 }
 ```
 
-## Step 4: Configure MCP Servers
+## 3. Pick MCP servers
 
-For each server the user selected, read the corresponding file from `examples/mcps/<name>.json` and merge the entry into `.mcp.json` under `"mcpServers"`.
+Browse `examples/mcps/` — each file is a ready-to-paste config:
 
-Example — if user picks `context7` and `shadcn`:
+| File | Server | What it does |
+|------|--------|-------------|
+| `serena.json` | Serena | Code intelligence via LSP (30+ langs) |
+| `chrome-devtools.json` | Chrome DevTools | Inspect, debug, profile via CDP |
+| `context7.json` | Context7 | Library/framework docs lookup |
+| `shadcn.json` | Shadcn | Official shadcn CLI MCP |
 
-```json
+Copy what you need into `.mcp.json`:
+
+```jsonc
 {
   "mcpServers": {
-    "context7": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
-    },
-    "shadcn": {
-      "command": "npx",
-      "args": ["shadcn@latest", "mcp"]
-    }
+    // paste entries from examples/mcps/ here
   }
 }
 ```
 
-If the user provides a custom MCP config, add it as-is.
+Don't need any MCP servers? Leave it empty. You can always add them later.
 
-## Step 5: Create Commands
+## 4. Add commands (optional)
 
-For each command the user requested:
+Commands are slash commands the user types manually (e.g. `/my-plugin:deploy`).
 
-1. Copy `commands/.template.md` to `commands/<command-name>.md`
-2. Fill in the frontmatter:
-   - `description`: what the command does
-   - `argument-hint`: expected arguments (if any)
-   - `allowed-tools`: tools this command needs (default: `[Read, Glob, Grep, Bash]`)
-3. Write the command instructions in markdown below the frontmatter
-4. The variable `$ARGUMENTS` captures everything the user types after the command name
+```bash
+cp commands/.template.md commands/deploy.md
+```
 
-## Step 6: Create Skills
+Edit the file — the frontmatter controls behavior:
 
-For each skill the user requested:
+```markdown
+---
+description: Deploy to staging
+argument-hint: <environment>
+allowed-tools: [Bash]
+---
 
-1. Copy `skills/.template/` to `skills/<skill-name>/`
-2. Edit `skills/<skill-name>/SKILL.md`:
-   - `name`: skill identifier
-   - `description`: **critical** — this tells Claude WHEN to auto-invoke. Be specific with trigger phrases.
-   - `version`: `0.1.0`
-3. Write the skill instructions: what Claude should do when the skill activates
+Deploy $ARGUMENTS to staging.
 
-## Step 7: Create Agents
+1. Run the deploy script
+2. Verify health check
+3. Report status
+```
 
-For each agent the user requested:
+## 5. Add skills (optional)
 
-1. Copy `agents/.template.md` to `agents/<agent-name>.md`
-2. Fill in the frontmatter:
-   - `name`: agent identifier
-   - `description`: when to invoke this agent (trigger conditions)
-   - `model`: `opus` (complex), `sonnet` (balanced), `haiku` (fast)
-   - `color`: UI color (`green`, `blue`, `red`, `yellow`, `purple`)
-3. Write the agent's full system prompt below the frontmatter
+Skills are auto-invoked by Claude based on context — no user action needed.
 
-## Step 8: Configure Hooks (if needed)
+```bash
+cp -r skills/.template skills/my-skill
+```
 
-Edit `hooks/hooks.json`. Available events:
+Edit `skills/my-skill/SKILL.md`. The `description` is the trigger — be specific:
 
-| Event | When it fires |
-|-------|---------------|
-| `PreToolUse` | Before Claude uses any tool |
-| `PostToolUse` | After tool execution succeeds |
-| `Stop` | When Claude attempts to stop |
-| `SessionStart` | At session start |
-| `SessionEnd` | At session end |
-| `UserPromptSubmit` | When user submits a prompt |
-| `SubagentStart` | When a subagent starts |
-| `SubagentStop` | When a subagent stops |
-| `PreCompact` | Before conversation compaction |
+```markdown
+---
+name: my-skill
+description: Auto-invoked when user asks about database migrations or schema changes
+---
+```
 
-Hook format:
+## 6. Add agents (optional)
+
+Agents are specialized subagents with their own system prompt.
+
+```bash
+cp agents/.template.md agents/reviewer.md
+```
+
+Edit the frontmatter and write the system prompt below it.
+
+## 7. Add hooks (optional)
+
+Most plugins don't need hooks initially. If you do, edit `hooks/hooks.json`:
 
 ```json
 {
   "hooks": {
-    "<Event>": [
+    "PreToolUse": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "path/to/script.sh",
-            "timeout": 10
-          }
-        ],
+        "hooks": [{ "type": "command", "command": "your-script.sh" }],
         "matcher": "Edit|Write"
       }
     ]
@@ -150,34 +115,38 @@ Hook format:
 }
 ```
 
-Use `${CLAUDE_PLUGIN_ROOT}` for plugin-relative paths in hook commands.
+## 8. Clean up
 
-## Step 9: Clean Up
+- Delete `.template` files you didn't use (or keep them for later)
+- Optionally delete `examples/` for a cleaner deploy
+- Update `README.md` to describe your actual plugin
 
-- Delete any `.template` files that weren't used (leave them if user might add more later)
-- Delete `examples/` directory if the user wants a clean deploy (optional — it's harmless to keep)
-- Update `README.md` to describe the actual plugin, not the template
-
-## Step 10: Test & Verify
+## 9. Test
 
 ```bash
-# Test the plugin
 claude --plugin-dir .
-
-# Verify structure
-find . -type f -not -path './.git/*' | sort
 ```
 
-Confirm with the user that:
-- MCP servers connect successfully
-- Commands appear in `/help`
-- Skills/agents are listed
+## 10. Install
 
-## Rules
+```bash
+# Personal use
+claude plugin install . --scope user
 
-- NEVER leave TODO placeholders in shipped files
-- NEVER invent MCP configs — use `examples/mcps/` or ask the user
-- NEVER add MCP servers the user didn't request
-- ALWAYS use the exact JSON format from the example files
-- ALWAYS ask before adding hooks (most plugins don't need them initially)
-- Keep command/skill/agent content focused and concise — no filler prose
+# Share with team (version controlled)
+claude plugin install . --scope project
+```
+
+---
+
+## Cheat Sheet
+
+| I want to... | Do this |
+|--------------|---------|
+| Add an MCP server | Copy from `examples/mcps/` into `.mcp.json` |
+| Add a command | `cp commands/.template.md commands/name.md` |
+| Add a skill | `cp -r skills/.template skills/name` |
+| Add an agent | `cp agents/.template.md agents/name.md` |
+| Add hooks | Edit `hooks/hooks.json` |
+| Test locally | `claude --plugin-dir .` |
+| Install | `claude plugin install . --scope user` |
