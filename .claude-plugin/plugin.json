@@ -1,0 +1,14 @@
+{
+  "name": "my-plugin",
+  "version": "0.1.0",
+  "description": "TODO: Describe what your plugin does",
+  "author": {
+    "name": "TODO: Your name"
+  },
+  "license": "MIT",
+  "keywords": [],
+  "mcpServers": "./.mcp.json",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
+}

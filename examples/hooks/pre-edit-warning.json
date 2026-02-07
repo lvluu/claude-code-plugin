@@ -1,0 +1,17 @@
+{
+  "description": "Example: warn before editing test files",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Warning: editing test file — make sure tests still pass'",
+            "timeout": 5
+          }
+        ],
+        "matcher": "Edit|Write"
+      }
+    ]
+  }
+}
