@@ -154,9 +154,24 @@ Use `${CLAUDE_PLUGIN_ROOT}` for plugin-relative paths in hook commands.
 
 ## Step 9: Clean Up
 
-- Delete any `.template` files that weren't used (leave them if user might add more later)
-- Delete `examples/` directory if the user wants a clean deploy (optional — it's harmless to keep)
-- Update `README.md` to describe the actual plugin, not the template
+Remove only the human setup guide — everything else has ongoing value:
+
+```bash
+rm INSTRUCTIONS.md
+```
+
+**KEEP these files** — they serve as context for future plugin development:
+
+| File | Why keep |
+|------|----------|
+| `INSTRUCTIONS_AI.md` | You (the AI) can re-read this to add more commands/skills/agents later |
+| `examples/` | Reference catalog — user will copy from here when adding MCP servers, agents, etc. |
+| `examples/mcps/README.md` | Documents API keys and setup notes for each server |
+| `.template` files | Copy-paste source for creating new commands/skills/agents |
+
+**Rewrite** `README.md` to describe the actual plugin (not the template).
+
+**DO NOT delete** `examples/`, `INSTRUCTIONS_AI.md`, or `.template` files unless the user explicitly asks.
 
 ## Step 10: Test & Verify
 

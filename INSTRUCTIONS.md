@@ -117,9 +117,20 @@ Most plugins don't need hooks initially. If you do, edit `hooks/hooks.json`:
 
 ## 8. Clean up
 
-- Delete `.template` files you didn't use (or keep them for later)
-- Optionally delete `examples/` for a cleaner deploy
-- Update `README.md` to describe your actual plugin
+```bash
+# Remove the human setup guide (you're done with it)
+rm INSTRUCTIONS.md
+```
+
+**Keep these** — they're useful context for adding more stuff later:
+
+| File | Why keep |
+|------|----------|
+| `INSTRUCTIONS_AI.md` | AI can re-read it to add more commands/skills/agents later |
+| `examples/` | Reference catalog for adding MCP servers, agents, etc. |
+| `.template` files | Copy-paste source for creating new commands/skills/agents |
+
+**Rewrite** `README.md` to describe your actual plugin.
 
 ## 9. Test
 
